@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "DbQuery": {
+      "commandName": "Project",
+      "commandLineArgs": "../.dbScripts/DropObjectsDbScript.sql",
+      "workingDirectory": "C:\\Shared\\Ason\\Repos\\payroll.backend\\.batches"
+    }
+  }
+}
