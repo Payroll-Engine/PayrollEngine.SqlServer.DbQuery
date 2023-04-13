@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<AssemblyName>PayrollEngine.SqlServer.DbQuery</AssemblyName>
 		<RootNamespace>PayrollEngine.SqlServer.DbQuery</RootNamespace>
-		<UserSecretsId>PayrollEngine.SqlServer.DbQuery</UserSecretsId>
+		<UserSecretsId>SqlServer.DbQuery</UserSecretsId>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Authors>Jani Giannoudis</Authors>
 		<Company>Software Consulting Giannoudis</Company>
@@ -31,8 +31,8 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
-		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.8.0" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
+		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.13.0" />
 	</ItemGroup>
 
 </Project>
