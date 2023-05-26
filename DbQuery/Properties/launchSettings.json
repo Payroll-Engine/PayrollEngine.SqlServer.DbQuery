@@ -2,8 +2,8 @@
   "profiles": {
     "DbQuery": {
       "commandName": "Project",
-      "commandLineArgs": "../.dbScripts/DropObjectsDbScript.sql",
-      "workingDirectory": "C:\\Shared\\Ason\\Repos\\payroll.backend\\.batches"
+      "commandLineArgs": "PayrollEngine_DefaultSetup_1.0.0.sql \"server=localhost; database=PayrollEngine; Integrated Security=SSPI;TrustServerCertificate=True;\"",
+      "workingDirectory": "C:\\Shared\\PayrollEngine\\Repos\\PayrollEngine.Backend\\DbScripts"
     }
   }
 }

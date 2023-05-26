@@ -38,6 +38,10 @@ sealed class Program
 
         // connection string
         var dbConnectionString = configuration.GetConnectionString(DatabaseConnectionString);
+        if (string.IsNullOrWhiteSpace(dbConnectionString) && args.Length > 1)
+        {
+            dbConnectionString = args[1];
+        }
         if (string.IsNullOrWhiteSpace(dbConnectionString))
         {
             Console.WriteLine($"Missing database connection string {DatabaseConnectionString}");
@@ -97,10 +101,11 @@ sealed class Program
 
     private static void ShowHelp()
     {
-        Console.WriteLine("Usage: DbQuery ScriptFile");
+        Console.WriteLine("Usage: DbQuery ScriptFile [ConnectionString]");
         Console.WriteLine();
         Console.WriteLine("Examples:");
-        Console.WriteLine("DbQuery MyQuery.sql");
+        Console.WriteLine("  DbQuery MyQuery.sql");
+        Console.WriteLine("  DbQuery MyQuery.sql 'server=localhost;database=MyDatabase; Integrated Security=SSPI;TrustServerCertificate=True;'");
         Wait();
     }
 
