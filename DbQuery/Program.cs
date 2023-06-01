@@ -15,7 +15,7 @@ sealed class Program
 
     private void Execute(string[] args)
     {
-        Console.WriteLine($"ASON Payroll Database Query {GetType().Assembly.GetName().Version}");
+        Console.WriteLine($"Payroll Engine Database Query {GetType().Assembly.GetName().Version}");
         Console.WriteLine();
 
         if (args.Length < 1)

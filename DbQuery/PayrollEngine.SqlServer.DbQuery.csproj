@@ -4,7 +4,7 @@
 		<OutputType>Exe</OutputType>
 		<AssemblyName>PayrollEngine.SqlServer.DbQuery</AssemblyName>
 		<RootNamespace>PayrollEngine.SqlServer.DbQuery</RootNamespace>
-		<UserSecretsId>SqlServer.DbQuery</UserSecretsId>
+		<UserSecretsId>PayrollEngine.SqlServer.DbQuery</UserSecretsId>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Authors>Jani Giannoudis</Authors>
 		<Company>Software Consulting Giannoudis</Company>
