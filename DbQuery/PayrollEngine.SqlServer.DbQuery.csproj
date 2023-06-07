@@ -6,11 +6,7 @@
 		<RootNamespace>PayrollEngine.SqlServer.DbQuery</RootNamespace>
 		<UserSecretsId>PayrollEngine.SqlServer.DbQuery</UserSecretsId>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-		<Authors>Jani Giannoudis</Authors>
-		<Company>Software Consulting Giannoudis</Company>
-		<Copyright>2023 Software Consulting Giannoudis</Copyright>
-		<Product>Payroll Engine</Product>
-		<Description>Payroll Engine SQL Server Query Application</Description>
+		<Description>Payroll Engine SQL-Server DbQuery</Description>
 	</PropertyGroup>
 
 	<ItemGroup>
