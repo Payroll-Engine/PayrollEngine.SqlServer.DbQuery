@@ -29,7 +29,7 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
-		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.13.0" />
+		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="170.18.0" />
 	</ItemGroup>
 
 </Project>
