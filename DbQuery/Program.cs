@@ -33,15 +33,10 @@ sealed class Program
             return;
         }
 
-        // configuration
-        var configuration = GetConfiguration();
-
         // connection string
-        var dbConnectionString = configuration.GetConnectionString(DatabaseConnectionString);
-        if (string.IsNullOrWhiteSpace(dbConnectionString) && args.Length > 1)
-        {
-            dbConnectionString = args[1];
-        }
+        var dbConnectionString = args.Length > 1 ? 
+            args[1] : 
+            GetConfiguration().GetConnectionString(DatabaseConnectionString);
         if (string.IsNullOrWhiteSpace(dbConnectionString))
         {
             Console.WriteLine($"Missing database connection string {DatabaseConnectionString}");

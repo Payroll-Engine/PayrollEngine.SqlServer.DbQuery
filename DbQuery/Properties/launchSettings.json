@@ -2,8 +2,8 @@
   "profiles": {
     "DbQuery": {
       "commandName": "Project",
-      "commandLineArgs": "PayrollEngine_DefaultSetup_1.0.0.sql \"server=localhost; database=PayrollEngine; Integrated Security=SSPI;TrustServerCertificate=True;\"",
-      "workingDirectory": "C:\\Shared\\PayrollEngine\\Repos\\PayrollEngine.Backend\\DbScripts"
+      "commandLineArgs": "PayrollEngine_DatabaseSetup_1.0.0.sql",
+      "workingDirectory": "C:\\Shared\\PayrollEngine\\Repos\\PayrollEngine.Backend\\Database\\1.0"
     }
   }
 }
