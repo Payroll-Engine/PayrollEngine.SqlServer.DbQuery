@@ -9,7 +9,7 @@ namespace PayrollEngine.SqlServer.DbQuery
     {
         public const int DefaultQueryTimeout = 5;
 
-        internal async Task TestAsync(int timeout = DefaultQueryTimeout, string connectionString = null)
+        internal async Task TestAsync(string connectionString = null, int timeout = DefaultQueryTimeout)
         {
             // connection string
             connectionString = GetConnectionString(connectionString);
@@ -113,8 +113,8 @@ namespace PayrollEngine.SqlServer.DbQuery
             WriteTitleLine("- TestServer");
             Console.WriteLine("      Test SQL database server");
             Console.WriteLine("      Arguments:");
-            Console.WriteLine("          1. Request timeout in seconds (optional, default: 5)");
-            Console.WriteLine("          2. Database connection string (optional, default from app-settings)");
+            Console.WriteLine("          1. Database connection string (optional, default from app-settings)");
+            Console.WriteLine("          2. Request timeout in seconds (optional, default: 5)");
             Console.WriteLine("      Output:");
             Console.WriteLine("          Exit code -1: database server not available");
             Console.WriteLine("      Examples:");

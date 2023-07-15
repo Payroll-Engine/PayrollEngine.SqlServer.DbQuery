@@ -78,9 +78,9 @@ sealed class Program
 
     private async Task TestServerAsync(string[] args)
     {
-        var timeout = args.Length > 1 ? int.Parse(args[1]) : TestServerCommand.DefaultQueryTimeout;
-        var connectionString = args.Length > 2 ? args[2] : null;
-        await new TestServerCommand().TestAsync(timeout, connectionString);
+        var connectionString = args.Length > 1 ? args[1] : null;
+        var timeout = args.Length > 2 ? int.Parse(args[2]) : TestServerCommand.DefaultQueryTimeout;
+        await new TestServerCommand().TestAsync(connectionString, timeout);
     }
 
     private async Task TestVersionAsync(string[] args)
