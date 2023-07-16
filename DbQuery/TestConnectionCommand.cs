@@ -9,10 +9,10 @@ namespace PayrollEngine.SqlServer.DbQuery
         internal async Task TestAsync(string connectionString = null)
         {
             // connection string
-            connectionString = GetConnectionString(connectionString);
+            connectionString = ConnectionConfiguration.GetConnectionString(connectionString);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                Console.WriteLine($"Missing database connection string {DatabaseConnectionString}");
+                Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
                 Wait();
                 return;
             }

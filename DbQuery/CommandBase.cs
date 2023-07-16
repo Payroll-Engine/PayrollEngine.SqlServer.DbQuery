@@ -1,32 +1,9 @@
 ﻿using System;
-using Microsoft.Extensions.Configuration;
 
 namespace PayrollEngine.SqlServer.DbQuery
 {
     internal class CommandBase
     {
-        /// <summary>Environment variable name, containing the Payroll database connection string</summary>
-        /// <remarks>duplicated from PayrollEngine.SystemSpecification</remarks>
-        protected static readonly string DatabaseConnectionString = "PayrollEngineDatabase";
-
-        protected static string GetConnectionString(string value = null) => !string.IsNullOrWhiteSpace(value) ?
-                value :
-                GetConfiguration().GetConnectionString(DatabaseConnectionString);
-
-        private static IConfiguration GetConfiguration()
-        {
-            // builder
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-
-            // configuration
-            IConfiguration configuration = builder
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddUserSecrets<Program>()
-                .Build();
-            return configuration;
-        }
-
         protected static void WriteTitleLine(string text) =>
             WriteColorLine(text, ConsoleColor.Cyan);
 
