@@ -8,20 +8,24 @@ sealed class Program
 {
     private async Task ExecuteAsync(string[] args)
     {
-        var verbose = VerboseMode(args);
+        var verbose = GetToggle(args, "verbose");
         if (verbose)
         {
             Console.WriteLine($"Payroll Engine Database Query {GetType().Assembly.GetName().Version}");
             Console.WriteLine();
         }
 
-        // command
+        // command from program arguments
         var command = GetCommand(args);
+
+        // help
         if (command == null)
         {
             ShowHelp();
             return;
         }
+
+        // start command
         try
         {
             switch (command)
@@ -38,11 +42,18 @@ sealed class Program
                 case Command.TestVersion:
                     await TestVersionAsync(verbose, args);
                     break;
+                case Command.TestEmptyTable:
+                    await TestEmptyTableAsync(verbose, args);
+                    break;
             }
 
         }
         catch (Exception exception)
         {
+            if (Environment.ExitCode == 0)
+            {
+                Environment.ExitCode = -10;
+            }
             Console.WriteLine(exception);
         }
     }
@@ -54,24 +65,27 @@ sealed class Program
             ShowHelp();
             return;
         }
-        var scriptFile = args[1];
-        var connectionString = args.Length > 2 ? args[2] : null;
-        await new QueryCommand().QueryAsync(verbose, NoCatalogMode(args), scriptFile, connectionString);
+        var scriptFile = GetArgument(args, 1);
+        var connectionString = GetArgument(args, 2);
+        var noCatalog = GetToggle(args, "noCatalog");
+        await new QueryCommand().QueryAsync(verbose, noCatalog, scriptFile, connectionString);
     }
-    
-    private static bool NoCatalogMode(string[] args) =>
-        args.Any(x => string.Equals("/noCatalog", x, StringComparison.InvariantCultureIgnoreCase));
 
     private async Task TestConnectionAsync(bool verbose, string[] args)
     {
-        var connectionString = args.Length > 1 ? args[1] : null;
+        var connectionString = GetArgument(args, 1);
         await new TestConnectionCommand().TestAsync(verbose, connectionString);
     }
 
     private async Task TestServerAsync(bool verbose, string[] args)
     {
-        var connectionString = args.Length > 1 ? args[1] : null;
-        var timeout = args.Length > 2 ? int.Parse(args[2]) : TestServerCommand.DefaultTestTimeout;
+        var connectionString = GetArgument(args, 1);
+        var timeout = TestServerCommand.DefaultTestTimeout;
+        var timeoutArg = GetArgument(args, 2);
+        if (!string.IsNullOrWhiteSpace(timeoutArg))
+        {
+            int.TryParse(timeoutArg, out timeout);
+        }
         await new TestServerCommand().TestAsync(verbose, connectionString, timeout);
     }
 
@@ -83,19 +97,59 @@ sealed class Program
             return;
         }
 
-        var connectionString = args.Length > 6 ? args[6] : null;
+        var connectionString = GetArgument(args, 6);
         await new TestVersionCommand().TestAsync(verbose, new()
         {
-            TableName = args[1],
-            MajorVersionColumnName = args[2],
-            MinorVersionColumnName = args[3],
-            SubVersionColumnName = args[4],
-            MinVersion = args[5]
+            TableName = GetArgument(args, 1),
+            MajorVersionColumnName = GetArgument(args, 2),
+            MinorVersionColumnName = GetArgument(args, 3),
+            SubVersionColumnName = GetArgument(args, 4),
+            MinVersion = GetArgument(args, 5)
         }, connectionString);
     }
 
-    private static bool VerboseMode(string[] args) =>
-        args.Any(x => string.Equals("/verbose", x, StringComparison.InvariantCultureIgnoreCase));
+    private async Task TestEmptyTableAsync(bool verbose, string[] args)
+    {
+        if (args.Length < 2)
+        {
+            ShowHelp();
+            return;
+        }
+
+        var tableName = GetArgument(args, 1);
+        var connectionString = GetArgument(args, 2);
+        await new TestEmptyTableCommand().TestAsync(verbose, tableName, connectionString);
+    }
+
+    private static string GetArgument(string[] args, int index)
+    {
+        if (args.Length < 2)
+        {
+            return null;
+        }
+
+        // ignore args[0]
+        var argIndex = 0;
+        for (var i = 1; i < args.Length; i++)
+        {
+            var arg = args[i];
+            // ignore toggle
+            if (arg.StartsWith('/') || arg.StartsWith('-'))
+            {
+                continue;
+            }
+            argIndex++;
+            if (argIndex == index)
+            {
+                return arg;
+            }
+        }
+        return null;
+    }
+
+    private static bool GetToggle(string[] args, string name) =>
+        args.Any(x => string.Equals($"/{name}", x, StringComparison.InvariantCultureIgnoreCase) ||
+                      string.Equals($"-{name}", x, StringComparison.InvariantCultureIgnoreCase));
 
     private static Command? GetCommand(string[] args)
     {
@@ -119,6 +173,7 @@ sealed class Program
         TestServerCommand.ShowHelp();
         TestConnectionCommand.ShowHelp();
         TestVersionCommand.ShowHelp();
+        TestEmptyTableCommand.ShowHelp();
         Wait();
     }
 
@@ -129,15 +184,6 @@ sealed class Program
         Console.ReadKey(true);
     }
 
-    static async Task Main(string[] args)
-    {
-        try
-        {
-            await new Program().ExecuteAsync(args);
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-        }
-    }
+    static async Task Main(string[] args) =>
+        await new Program().ExecuteAsync(args);
 }

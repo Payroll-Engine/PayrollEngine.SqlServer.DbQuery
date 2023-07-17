@@ -28,6 +28,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
             catch (Exception exception)
             {
+                Environment.ExitCode = -2;
                 Console.WriteLine(exception);
             }
         }

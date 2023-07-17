@@ -26,6 +26,9 @@ namespace PayrollEngine.SqlServer.DbQuery
             // database connection
             // // see https://stackoverflow.com/questions/10550541/how-to-get-database-name-from-connection-string-using-sqlconnectionstringbuilder
             var connectionInfo = new SqlConnectionStringBuilder(connectionString);
+            // remove initial catalog from connection string
+            connectionInfo.Remove("Initial Catalog");
+            connectionString = connectionInfo.ToString();
             var dataSource = connectionInfo["Data Source"] as string;
 
             // user info
@@ -64,6 +67,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
             catch (Exception exception)
             {
+                Environment.ExitCode = -2;
                 Console.WriteLine(exception);
             }
         }

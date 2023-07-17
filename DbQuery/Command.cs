@@ -6,6 +6,7 @@ namespace PayrollEngine.SqlServer.DbQuery
         Query,
         TestServer,
         TestConnection,
-        TestVersion
+        TestVersion,
+        TestEmptyTable
     }
 }

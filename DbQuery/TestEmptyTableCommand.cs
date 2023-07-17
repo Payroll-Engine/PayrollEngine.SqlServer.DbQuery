@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace PayrollEngine.SqlServer.DbQuery
 {
-    internal sealed class TestVersionCommand : CommandBase
+    internal sealed class TestEmptyTableCommand : CommandBase
     {
         public const int DefaultQueryTimeout = 5;
 
-        internal async Task TestAsync(bool verbose, TestVersionSettings settings, string connectionString = null)
+        internal async Task TestAsync(bool verbose, string tableName, string connectionString = null)
         {
             // connection string
             connectionString = ConnectionConfiguration.GetConnectionString(connectionString);
@@ -33,21 +33,20 @@ namespace PayrollEngine.SqlServer.DbQuery
             {
                 WriteTitleLine("Test version");
                 Console.WriteLine($"Server:       {dataSource}");
+                Console.WriteLine($"Table:        {tableName}");
                 Console.WriteLine();
             }
 
             try
             {
-                var available = await TestServerAvailableAsync(settings, connectionString);
-
-                // server not available
-                if (!available)
+                var count = await GetTableRowCountAsync(tableName, connectionString);
+                if (count == 0)
                 {
                     Environment.ExitCode = -1;
                     if (verbose)
                     {
                         Console.WriteLine();
-                        WriteErrorLine($"SQL Server {dataSource} is not available.");
+                        WriteErrorLine($"Empty table {tableName}.");
                         Console.WriteLine();
                     }
                     return;
@@ -57,7 +56,7 @@ namespace PayrollEngine.SqlServer.DbQuery
                 if (verbose)
                 {
                     Console.WriteLine();
-                    WriteSuccessLine($"SQL Server {dataSource} is available.");
+                    WriteSuccessLine($"Table {tableName} has {count} rows.");
                     Console.WriteLine();
                 }
             }
@@ -68,62 +67,41 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
         }
 
-        private static async Task<bool> TestServerAvailableAsync(TestVersionSettings settings, string connectionString)
+        private static async Task<int> GetTableRowCountAsync(string tableName, string connectionString)
         {
-            var testVersion = new Version(settings.MinVersion);
             try
             {
                 var connection = new SqlConnection(connectionString);
-                var query = $"SELECT {settings.MajorVersionColumnName}, {settings.MinorVersionColumnName}, {settings.SubVersionColumnName} FROM {settings.TableName}";
+                var query = $"SELECT COUNT(*) FROM {tableName}";
                 await using (connection)
                 {
                     await using var command = new SqlCommand(query, connection);
                     await connection.OpenAsync();
 
-                    var validVersion = false;
-                    var reader = await command.ExecuteReaderAsync();
-                    while (reader.Read())
-                    {
-                        var major = reader.GetInt32(0);
-                        var minor = reader.GetInt32(1);
-                        var sub = reader.GetInt32(2);
-
-                        var curVersion = new Version(major, minor, sub);
-                        if (curVersion >= testVersion)
-                        {
-                            validVersion = true;
-                            break;
-                        }
-                    }
-                    connection.Close();
-
-                    return validVersion;
+                    var count = (int)command.ExecuteScalar();
+                    return count;
                 }
             }
             catch
             {
-                return false;
+                return 0;
             }
         }
 
         internal static void ShowHelp()
         {
-            WriteTitleLine("- TestVersion");
-            Console.WriteLine("      Test SQL database server");
+            WriteTitleLine("- TestEmptyTable");
+            Console.WriteLine("      Test if a database server table is empty");
             Console.WriteLine("      Arguments:");
             Console.WriteLine("          1. The table name");
-            Console.WriteLine("          2. The major version column name");
-            Console.WriteLine("          3. The minor version column name");
-            Console.WriteLine("          4. The subversion column name");
-            Console.WriteLine("          5. Minimum required version");
-            Console.WriteLine("          6. Database connection string (optional, default from app-settings)");
+            Console.WriteLine("          2. Database connection string (optional, default from app-settings)");
             Console.WriteLine("      Toggles:");
             Console.WriteLine("          verbose mode: /verbose (default: off)");
             Console.WriteLine("      Output:");
-            Console.WriteLine("          Exit code -1: version is not available");
+            Console.WriteLine("          Exit code -1: table is empty");
             Console.WriteLine("          Exit code -2: invalid database connection string");
             Console.WriteLine("      Examples:");
-            Console.WriteLine("          TestVersion VersionServer ");
+            Console.WriteLine("          TestEmptyTable Tenant");
             Wait();
         }
     }
