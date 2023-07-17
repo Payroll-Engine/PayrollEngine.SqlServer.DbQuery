@@ -8,15 +8,18 @@ namespace PayrollEngine.SqlServer.DbQuery
     {
         public const int DefaultQueryTimeout = 5;
 
-        internal async Task TestAsync(string tableName, string majorVersionColumnName,
-            string minorVersionColumnName, string subVersionColumnName, string minVersion, string connectionString = null)
+        internal async Task TestAsync(bool verbose, TestVersionSettings settings, string connectionString = null)
         {
             // connection string
             connectionString = ConnectionConfiguration.GetConnectionString(connectionString);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
-                Wait();
+                Environment.ExitCode = -2;
+                if (verbose)
+                {
+                    Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
+                    Wait();
+                }
                 return;
             }
 
@@ -26,26 +29,37 @@ namespace PayrollEngine.SqlServer.DbQuery
             var dataSource = connectionInfo["Data Source"] as string;
 
             // user info
-            WriteTitleLine("Test version");
-            Console.WriteLine($"Server:       {dataSource}");
-            Console.WriteLine();
+            if (verbose)
+            {
+                WriteTitleLine("Test version");
+                Console.WriteLine($"Server:       {dataSource}");
+                Console.WriteLine();
+            }
 
             try
             {
-                var available = await TestServerAvailableAsync(tableName, majorVersionColumnName,
-                    minorVersionColumnName, subVersionColumnName, minVersion, connectionString);
+                var available = await TestServerAvailableAsync(settings, connectionString);
 
-                Console.WriteLine();
-                if (available)
-                {
-                    WriteSuccessLine($"SQL Server {dataSource} is available.");
-                }
-                else
+                // server not available
+                if (!available)
                 {
                     Environment.ExitCode = -1;
-                    WriteErrorLine($"SQL Server {dataSource} is not available.");
+                    if (verbose)
+                    {
+                        Console.WriteLine();
+                        WriteErrorLine($"SQL Server {dataSource} is not available.");
+                        Console.WriteLine();
+                    }
+                    return;
                 }
-                Console.WriteLine();
+
+                // server available
+                if (verbose)
+                {
+                    Console.WriteLine();
+                    WriteSuccessLine($"SQL Server {dataSource} is available.");
+                    Console.WriteLine();
+                }
             }
             catch (Exception exception)
             {
@@ -53,14 +67,13 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
         }
 
-        private static async Task<bool> TestServerAvailableAsync(string tableName, string majorVersionColumnName,
-            string minorVersionColumnName, string subVersionColumnName, string minVersion, string connectionString)
+        private static async Task<bool> TestServerAvailableAsync(TestVersionSettings settings, string connectionString)
         {
-            var testVersion = new Version(minVersion);
+            var testVersion = new Version(settings.MinVersion);
             try
             {
                 var connection = new SqlConnection(connectionString);
-                var query = $"SELECT {majorVersionColumnName}, {minorVersionColumnName}, {subVersionColumnName} FROM {tableName}";
+                var query = $"SELECT {settings.MajorVersionColumnName}, {settings.MinorVersionColumnName}, {settings.SubVersionColumnName} FROM {settings.TableName}";
                 await using (connection)
                 {
                     await using var command = new SqlCommand(query, connection);
@@ -103,8 +116,11 @@ namespace PayrollEngine.SqlServer.DbQuery
             Console.WriteLine("          4. The subversion column name");
             Console.WriteLine("          5. Minimum required version");
             Console.WriteLine("          6. Database connection string (optional, default from app-settings)");
+            Console.WriteLine("      Toggles:");
+            Console.WriteLine("          verbose mode: /verbose (default: off)");
             Console.WriteLine("      Output:");
             Console.WriteLine("          Exit code -1: version is not available");
+            Console.WriteLine("          Exit code -2: invalid database connection string");
             Console.WriteLine("      Examples:");
             Console.WriteLine("          TestVersion VersionServer ");
             Wait();

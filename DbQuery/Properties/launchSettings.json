@@ -2,8 +2,8 @@
   "profiles": {
     "DbQuery": {
       "commandName": "Project",
-      "commandLineArgs": "TestVersion Version MajorVersion MinorVersion SubVersion 0.9.0",
-      "workingDirectory": "C:\\Shared\\PayrollEngine\\Repos\\PayrollEngine.Backend\\Database\\1.0"
+      "commandLineArgs": "Query CreateDefaultDatabase.sql \"server=localhost; Initial Catalog=PayrollEngine; Integrated Security=SSPI; Connection Timeout=1000; TrustServerCertificate=true\" /verbose /noCatalog",
+      "workingDirectory": "C:\\Shared\\PayrollEngine\\Repos\\PayrollEngine.Backend\\Database"
     }
   }
 }

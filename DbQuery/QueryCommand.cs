@@ -2,20 +2,32 @@
 using Microsoft.SqlServer.Management.Common;
 using Microsoft.SqlServer.Management.Smo;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PayrollEngine.SqlServer.DbQuery
 {
+    /// <summary>
+    /// complex sql script including GO statements
+    /// SqlCommand doesn't support complex scripts
+    /// <remarks>see https://stackoverflow.com/questions/40814/execute-a-large-sql-script-with-go-commands</remarks>
+    /// </summary>
     internal sealed class QueryCommand : CommandBase
     {
-        internal async Task QueryAsync(string scriptFileName, string connectionString = null)
+        internal async Task QueryAsync(bool verbose, bool noCatalog, string scriptFileMask, string connectionString = null)
         {
             // argument T-SQL script file name
-            if (!File.Exists(scriptFileName))
+            var scriptFiles = GetScriptFileNames(scriptFileMask);
+            if (!scriptFiles.Any())
             {
-                Console.WriteLine($"Missing script file {scriptFileName}");
-                Wait();
+                Environment.ExitCode = -3;
+                if (verbose)
+                {
+                    Console.WriteLine($"Missing script file {scriptFileMask}");
+                    Wait();
+                }
                 return;
             }
 
@@ -23,8 +35,12 @@ namespace PayrollEngine.SqlServer.DbQuery
             connectionString = ConnectionConfiguration.GetConnectionString(connectionString);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
-                Wait();
+                Environment.ExitCode = -2;
+                if (verbose)
+                {
+                    Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
+                    Wait();
+                }
                 return;
             }
 
@@ -32,35 +48,66 @@ namespace PayrollEngine.SqlServer.DbQuery
             // // see https://stackoverflow.com/questions/10550541/how-to-get-database-name-from-connection-string-using-sqlconnectionstringbuilder
             var connectionInfo = new SqlConnectionStringBuilder(connectionString);
 
+            // query without catalog
+            if (noCatalog)
+            {
+                connectionInfo.Remove("Initial Catalog");
+                connectionString = connectionInfo.ToString();
+            }
+
             // user info
-            WriteTitleLine("Database Query");
-            Console.WriteLine($"Script:       {scriptFileName}");
-            Console.WriteLine($"Server:       {connectionInfo["Data Source"]}");
-            Console.WriteLine($"Database:     {connectionInfo["Initial Catalog"]}");
-            Console.WriteLine();
+            if (verbose)
+            {
+                WriteTitleLine("Database Query");
+                Console.WriteLine($"Script:       {scriptFileMask}");
+                Console.WriteLine($"Server:       {connectionInfo["Data Source"]}");
+                if (!noCatalog)
+                {
+                    Console.WriteLine($"Database:     {connectionInfo["Initial Catalog"]}");
+                }
+                Console.WriteLine();
+            }
 
             try
             {
-                // read script from file
-                var script = await File.ReadAllTextAsync(scriptFileName);
-
-                Console.Write($"Executing T-SQL script ({script.Length} characters)...");
-
                 // script execution
-                // complex sql script including GO statements
-                // SqlCommand doesn't support complex scripts
-                // see https://stackoverflow.com/questions/40814/execute-a-large-sql-script-with-go-commands
                 await using var connection = new SqlConnection(connectionString);
                 var server = new Server(new ServerConnection(connection));
-                var result = server.ConnectionContext.ExecuteNonQuery(script);
 
-                Console.WriteLine();
-                WriteSuccessLine($"done with query result: {result}");
-                Console.WriteLine();
+                foreach (var scriptFile in scriptFiles)
+                {
+                    // read script from file
+                    var script = await File.ReadAllTextAsync(scriptFile);
+                    if (string.IsNullOrWhiteSpace(script))
+                    {
+                        if (verbose)
+                        {
+                            WriteErrorLine($"Ignoring empty script file {scriptFile}");
+                        }
+                        continue;
+                    }
+
+                    // query execute
+                    if (verbose)
+                    {
+                        Console.Write($"Executing script {scriptFile} ({script.Length} characters)...");
+                    }
+                    var result = server.ConnectionContext.ExecuteNonQuery(script);
+                    if (verbose)
+                    {
+                        Console.WriteLine();
+                        WriteSuccessLine($"done with query result: {result}");
+                        Console.WriteLine();
+                    }
+                }
             }
             catch (Exception exception)
             {
-                Console.WriteLine(exception);
+                Environment.ExitCode = -1;
+                if (verbose)
+                {
+                    Console.WriteLine(exception);
+                }
             }
         }
 
@@ -69,11 +116,39 @@ namespace PayrollEngine.SqlServer.DbQuery
             WriteTitleLine("- Query");
             Console.WriteLine("      Execute a database T-SQL script");
             Console.WriteLine("      Arguments:");
-            Console.WriteLine("          1. Script file name");
+            Console.WriteLine("          1. Script file name(s) with file mask support");
             Console.WriteLine("          2. Database connection string (optional, default from app-settings)");
+            Console.WriteLine("      Toggles:");
+            Console.WriteLine("          verbose mode: /verbose (default: off)");
+            Console.WriteLine("          ignore connection initial catalog: /noCatalog (default: off)");
+            Console.WriteLine("      Output:");
+            Console.WriteLine("          Exit code -1: error in script execution");
+            Console.WriteLine("          Exit code -2: invalid database connection string");
+            Console.WriteLine("          Exit code -3: invalid script file");
             Console.WriteLine("      Examples:");
             Console.WriteLine("          Query MyQuery.sql");
             Console.WriteLine("          Query MyQuery.sql 'server=localhost;database=MyDatabase; Integrated Security=SSPI;TrustServerCertificate=True;'");
+        }
+
+        private static List<string> GetScriptFileNames(string fileMask)
+        {
+            if (string.IsNullOrWhiteSpace(fileMask))
+            {
+                throw new ArgumentException(nameof(fileMask));
+            }
+
+            var files = new List<string>();
+            // single file
+            if (File.Exists(fileMask))
+            {
+                files.Add(fileMask);
+            }
+            else
+            {
+                // multiple files
+                files.AddRange(new DirectoryInfo(Directory.GetCurrentDirectory()).GetFiles(fileMask).Select(x => x.Name));
+            }
+            return files;
         }
     }
 }

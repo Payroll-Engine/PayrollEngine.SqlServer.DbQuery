@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PayrollEngine.SqlServer.DbQuery;
@@ -7,8 +8,12 @@ sealed class Program
 {
     private async Task ExecuteAsync(string[] args)
     {
-        Console.WriteLine($"Payroll Engine Database Query {GetType().Assembly.GetName().Version}");
-        Console.WriteLine();
+        var verbose = VerboseMode(args);
+        if (verbose)
+        {
+            Console.WriteLine($"Payroll Engine Database Query {GetType().Assembly.GetName().Version}");
+            Console.WriteLine();
+        }
 
         // command
         var command = GetCommand(args);
@@ -22,16 +27,16 @@ sealed class Program
             switch (command)
             {
                 case Command.Query:
-                    await QueryAsync(args);
+                    await QueryAsync(verbose, args);
                     break;
                 case Command.TestConnection:
-                    await TestConnectionAsync(args);
+                    await TestConnectionAsync(verbose, args);
                     break;
                 case Command.TestServer:
-                    await TestServerAsync(args);
+                    await TestServerAsync(verbose, args);
                     break;
                 case Command.TestVersion:
-                    await TestVersionAsync(args);
+                    await TestVersionAsync(verbose, args);
                     break;
             }
 
@@ -41,6 +46,56 @@ sealed class Program
             Console.WriteLine(exception);
         }
     }
+
+    private async Task QueryAsync(bool verbose, string[] args)
+    {
+        if (args.Length < 2)
+        {
+            ShowHelp();
+            return;
+        }
+        var scriptFile = args[1];
+        var connectionString = args.Length > 2 ? args[2] : null;
+        await new QueryCommand().QueryAsync(verbose, NoCatalogMode(args), scriptFile, connectionString);
+    }
+    
+    private static bool NoCatalogMode(string[] args) =>
+        args.Any(x => string.Equals("/noCatalog", x, StringComparison.InvariantCultureIgnoreCase));
+
+    private async Task TestConnectionAsync(bool verbose, string[] args)
+    {
+        var connectionString = args.Length > 1 ? args[1] : null;
+        await new TestConnectionCommand().TestAsync(verbose, connectionString);
+    }
+
+    private async Task TestServerAsync(bool verbose, string[] args)
+    {
+        var connectionString = args.Length > 1 ? args[1] : null;
+        var timeout = args.Length > 2 ? int.Parse(args[2]) : TestServerCommand.DefaultTestTimeout;
+        await new TestServerCommand().TestAsync(verbose, connectionString, timeout);
+    }
+
+    private async Task TestVersionAsync(bool verbose, string[] args)
+    {
+        if (args.Length < 5)
+        {
+            ShowHelp();
+            return;
+        }
+
+        var connectionString = args.Length > 6 ? args[6] : null;
+        await new TestVersionCommand().TestAsync(verbose, new()
+        {
+            TableName = args[1],
+            MajorVersionColumnName = args[2],
+            MinorVersionColumnName = args[3],
+            SubVersionColumnName = args[4],
+            MinVersion = args[5]
+        }, connectionString);
+    }
+
+    private static bool VerboseMode(string[] args) =>
+        args.Any(x => string.Equals("/verbose", x, StringComparison.InvariantCultureIgnoreCase));
 
     private static Command? GetCommand(string[] args)
     {
@@ -56,49 +111,6 @@ sealed class Program
             return command;
         }
         return null;
-    }
-
-    private async Task QueryAsync(string[] args)
-    {
-        if (args.Length < 2)
-        {
-            ShowHelp();
-            return;
-        }
-        var scriptFile = args[1];
-        var connectionString = args.Length > 2 ? args[2] : null;
-        await new QueryCommand().QueryAsync(scriptFile, connectionString);
-    }
-
-    private async Task TestConnectionAsync(string[] args)
-    {
-        var connectionString = args.Length > 1 ? args[1] : null;
-        await new TestConnectionCommand().TestAsync(connectionString);
-    }
-
-    private async Task TestServerAsync(string[] args)
-    {
-        var connectionString = args.Length > 1 ? args[1] : null;
-        var timeout = args.Length > 2 ? int.Parse(args[2]) : TestServerCommand.DefaultQueryTimeout;
-        await new TestServerCommand().TestAsync(connectionString, timeout);
-    }
-
-    private async Task TestVersionAsync(string[] args)
-    {
-        if (args.Length < 5)
-        {
-            ShowHelp();
-            return;
-        }
-
-        var tableName = args[1];
-        var majorVersionColumnName = args[2];
-        var minorVersionColumnName = args[3];
-        var subVersionColumnName = args[4];
-        var minVersion = args[5];
-        var connectionString = args.Length > 6 ? args[6] : null;
-        await new TestVersionCommand().TestAsync(tableName, majorVersionColumnName,
-            minorVersionColumnName, subVersionColumnName, minVersion, connectionString);
     }
 
     private static void ShowHelp()
