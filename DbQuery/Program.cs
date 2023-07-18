@@ -33,8 +33,14 @@ sealed class Program
                 case Command.Query:
                     await QueryAsync(verbose, args);
                     break;
-                case Command.TestConnection:
-                    await TestConnectionAsync(verbose, args);
+                case Command.TestHttpConnection:
+                    await TestHttpConnectionAsync(verbose, args);
+                    break;
+                case Command.ParseUrl:
+                    await ParseUrl(args);
+                    break;
+                case Command.TestSqlConnection:
+                    await TestSqlConnectionAsync(verbose, args);
                     break;
                 case Command.TestServer:
                     await TestServerAsync(verbose, args);
@@ -71,10 +77,24 @@ sealed class Program
         await new QueryCommand().QueryAsync(verbose, noCatalog, scriptFile, connectionString);
     }
 
-    private async Task TestConnectionAsync(bool verbose, string[] args)
+    private async Task TestHttpConnectionAsync(bool verbose, string[] args)
+    {
+        var expression = GetArgument(args, 1);
+        await new TestHttpConnectionCommand().TestAsync(verbose, expression);
+    }
+
+    private static Task ParseUrl(string[] args)
+    {
+        var variableName = GetArgument(args, 1);
+        var expression = GetArgument(args, 2);
+        ParseUrlCommand.Parse(variableName, expression);
+        return Task.CompletedTask;
+    }
+
+    private async Task TestSqlConnectionAsync(bool verbose, string[] args)
     {
         var connectionString = GetArgument(args, 1);
-        await new TestConnectionCommand().TestAsync(verbose, connectionString);
+        await new TestSqlConnectionCommand().TestAsync(verbose, connectionString);
     }
 
     private async Task TestServerAsync(bool verbose, string[] args)
@@ -171,7 +191,9 @@ sealed class Program
     {
         QueryCommand.ShowHelp();
         TestServerCommand.ShowHelp();
-        TestConnectionCommand.ShowHelp();
+        TestHttpConnectionCommand.ShowHelp();
+        ParseUrlCommand.ShowHelp();
+        TestSqlConnectionCommand.ShowHelp();
         TestVersionCommand.ShowHelp();
         TestEmptyTableCommand.ShowHelp();
         Wait();

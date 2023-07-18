@@ -5,9 +5,8 @@ namespace PayrollEngine.SqlServer.DbQuery
 {
     internal static class ConnectionConfiguration
     {
-        /// <summary>Environment variable name, containing the Payroll database connection string</summary>
-        /// <remarks>duplicated from PayrollEngine.SystemSpecification</remarks>
-        internal static readonly string DatabaseConnectionString = "PayrollEngineDatabase";
+        /// <summary>Setting name, containing the Payroll database connection string</summary>
+        private static readonly string DatabaseConnectionSetting = "DatabaseConnection";
 
         internal static string GetConnectionString(string argument = null)
         {
@@ -17,15 +16,15 @@ namespace PayrollEngine.SqlServer.DbQuery
             // priority 2: application configuration
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                connectionString = GetConfiguration().GetConnectionString(DatabaseConnectionString);
+                connectionString = GetConfiguration().GetConnectionString(DatabaseConnectionSetting);
             }
 
-            // priority 3: environment variable
-            if (string.IsNullOrWhiteSpace(connectionString))
+            // priority 3: shared configuration
+            var sharedConfiguration = SharedConfiguration.GetSharedConfiguration();
+            if (sharedConfiguration.TryGetValue(DatabaseConnectionSetting, out var value))
             {
-                connectionString = Environment.GetEnvironmentVariable(DatabaseConnectionString);
+                connectionString = value;
             }
-
             return connectionString;
         }
 

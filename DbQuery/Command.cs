@@ -5,7 +5,9 @@ namespace PayrollEngine.SqlServer.DbQuery
     {
         Query,
         TestServer,
-        TestConnection,
+        TestHttpConnection,
+        ParseUrl,
+        TestSqlConnection,
         TestVersion,
         TestEmptyTable
     }

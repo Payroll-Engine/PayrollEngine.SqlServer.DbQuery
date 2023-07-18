@@ -15,11 +15,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 Environment.ExitCode = -2;
-                if (verbose)
-                {
-                    Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
-                    Wait();
-                }
+                Console.WriteLine("Missing database connection string");
                 return;
             }
 

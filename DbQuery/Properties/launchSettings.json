@@ -2,7 +2,7 @@
   "profiles": {
     "DbQuery": {
       "commandName": "Project",
-      "commandLineArgs": "TestEmptyTable Tenant",
+      "commandLineArgs": "TestHttpConnection https://localhost:44354/",
       "workingDirectory": "C:\\Temp\\PayrollEngine_0.5.0-pre-230713-6"
     }
   }

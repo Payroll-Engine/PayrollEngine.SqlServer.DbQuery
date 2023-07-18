@@ -23,11 +23,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             if (!scriptFiles.Any())
             {
                 Environment.ExitCode = -3;
-                if (verbose)
-                {
-                    Console.WriteLine($"Missing script file {scriptFileMask}");
-                    Wait();
-                }
+                Console.WriteLine($"Missing script file {scriptFileMask}");
                 return;
             }
 
@@ -36,11 +32,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 Environment.ExitCode = -2;
-                if (verbose)
-                {
-                    Console.WriteLine($"Missing database connection string {ConnectionConfiguration.DatabaseConnectionString}");
-                    Wait();
-                }
+                Console.WriteLine("Missing database connection string");
                 return;
             }
 
@@ -104,10 +96,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             catch (Exception exception)
             {
                 Environment.ExitCode = -1;
-                if (verbose)
-                {
-                    Console.WriteLine(exception);
-                }
+                Console.WriteLine(exception);
             }
         }
 
