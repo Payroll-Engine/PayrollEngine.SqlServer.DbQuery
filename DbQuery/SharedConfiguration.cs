@@ -21,15 +21,29 @@ namespace PayrollEngine.SqlServer.DbQuery
             var sharedConfiguration = await ReadAsync();
             foreach (var config in sharedConfiguration)
             {
-                var variable = $"${config.Key}$";
+                var key = config.Key;
+                var variable = $"${key}$";
                 if (expression.Contains(variable))
                 {
                     expression = expression.Replace(variable, config.Value);
+                }
+                else
+                {
+                    // alternative key
+                    key = char.IsUpper(key[0]) ? key.FirstCharacterToLower() : key.FirstCharacterToUpper();
+                    variable = $"${key}$";
+                    if (expression.Contains(variable))
+                    {
+                        expression = expression.Replace(variable, config.Value);
+                    }
                 }
             }
             return expression;
         }
 
+        /// <summary>
+        /// Get the shared configuration
+        /// </summary>
         internal static async Task<Dictionary<string, string>> ReadAsync()
         {
             var sharedConfigFileName = Environment.GetEnvironmentVariable(SharedConfigurationVariable);
@@ -51,7 +65,7 @@ namespace PayrollEngine.SqlServer.DbQuery
         /// <summary>
         /// Get shared configuration value
         /// </summary>
-        public static string GetSharedValue(Dictionary<string, string> sharedConfiguration, string name)
+        internal static string GetSharedValue(Dictionary<string, string> sharedConfiguration, string name)
         {
             // primary name
             if (sharedConfiguration.TryGetValue(name, out var value))
@@ -60,7 +74,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
 
             // alternative name
-            name = name.FirstCharacterToLower();
+            name = char.IsUpper(name[0]) ? name.FirstCharacterToLower() : name.FirstCharacterToUpper();
             if (sharedConfiguration.TryGetValue(name, out value))
             {
                 return value;
@@ -72,5 +86,11 @@ namespace PayrollEngine.SqlServer.DbQuery
         // copy from Core StringExtensions
         private static string FirstCharacterToLower(this string value) =>
             char.ToLowerInvariant(value[0]) + value.Substring(1);
+
+        /// <summary>Ensures first string character is upper</summary>
+        /// <param name="value">The string value</param>
+        /// <returns>String starting uppercase</returns>
+        private static string FirstCharacterToUpper(this string value) =>
+            value[0].ToString().ToUpper() + value.Substring(1);
     }
 }

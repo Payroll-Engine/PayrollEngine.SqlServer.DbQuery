@@ -26,7 +26,7 @@ namespace PayrollEngine.SqlServer.DbQuery
         internal static void ShowHelp()
         {
             WriteTitleLine("- ParseUrl");
-            Console.WriteLine("      Pars web url and store the result to an environment variable");
+            Console.WriteLine("      Parse web Url and store the result to an environment variable");
             Console.WriteLine("      Arguments:");
             Console.WriteLine("          1. variable name");
             Console.WriteLine("          2. Url with support for shared config variables");
