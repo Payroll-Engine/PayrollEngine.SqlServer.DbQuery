@@ -2,8 +2,8 @@
   "profiles": {
     "DbQuery": {
       "commandName": "Project",
-      "commandLineArgs": "TestHttpConnection https://localhost:44354/",
-      "workingDirectory": "C:\\Temp\\PayrollEngine_0.5.0-pre-230713-6"
+      "commandLineArgs": "TestServer /noCatalog",
+      "workingDirectory": "C:\\Shared\\PayrollEngine\\Setup"
     }
   }
 }

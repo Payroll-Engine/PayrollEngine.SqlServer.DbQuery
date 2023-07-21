@@ -28,7 +28,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
 
             // connection string
-            connectionString = ConnectionConfiguration.GetConnectionString(connectionString);
+            connectionString = await ConnectionConfiguration.GetConnectionStringAsync(connectionString);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 Environment.ExitCode = -2;

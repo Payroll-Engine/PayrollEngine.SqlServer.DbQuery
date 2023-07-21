@@ -11,7 +11,7 @@ namespace PayrollEngine.SqlServer.DbQuery
         internal async Task TestAsync(bool verbose, string connectionString = null, int timeout = DefaultTestTimeout)
         {
             // connection string
-            connectionString = ConnectionConfiguration.GetConnectionString(connectionString);
+            connectionString = await ConnectionConfiguration.GetConnectionStringAsync(connectionString);
             if (string.IsNullOrWhiteSpace(connectionString))
             {
                 Environment.ExitCode = -2;

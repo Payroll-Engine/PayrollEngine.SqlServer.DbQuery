@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace PayrollEngine.SqlServer.DbQuery
 {
@@ -10,14 +11,14 @@ namespace PayrollEngine.SqlServer.DbQuery
         /// <summary>Shared settings environment variable name, containing the json file name</summary>
         private static readonly string SharedConfigurationVariable = "PayrollConfiguration";
 
-        internal static string Parse(string expression)
+        internal static async Task<string> ParseAsync(string expression)
         {
             if (string.IsNullOrWhiteSpace(expression) || !expression.Contains('$'))
             {
                 return null;
             }
 
-            var sharedConfiguration = SharedConfiguration.GetSharedConfiguration();
+            var sharedConfiguration = await ReadAsync();
             foreach (var config in sharedConfiguration)
             {
                 var variable = $"${config.Key}$";
@@ -29,7 +30,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             return expression;
         }
 
-        internal static Dictionary<string, string> GetSharedConfiguration()
+        internal static async Task<Dictionary<string, string>> ReadAsync()
         {
             var sharedConfigFileName = Environment.GetEnvironmentVariable(SharedConfigurationVariable);
             if (string.IsNullOrWhiteSpace(sharedConfigFileName) || !File.Exists(sharedConfigFileName))
@@ -38,7 +39,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
             try
             {
-                var json = File.ReadAllText(sharedConfigFileName);
+                var json = await File.ReadAllTextAsync(sharedConfigFileName);
                 return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
             }
             catch
@@ -46,5 +47,30 @@ namespace PayrollEngine.SqlServer.DbQuery
                 return new();
             }
         }
+
+        /// <summary>
+        /// Get shared configuration value
+        /// </summary>
+        public static string GetSharedValue(Dictionary<string, string> sharedConfiguration, string name)
+        {
+            // primary name
+            if (sharedConfiguration.TryGetValue(name, out var value))
+            {
+                return value;
+            }
+
+            // alternative name
+            name = name.FirstCharacterToLower();
+            if (sharedConfiguration.TryGetValue(name, out value))
+            {
+                return value;
+            }
+
+            return null;
+        }
+
+        // copy from Core StringExtensions
+        private static string FirstCharacterToLower(this string value) =>
+            char.ToLowerInvariant(value[0]) + value.Substring(1);
     }
 }

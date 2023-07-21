@@ -83,12 +83,11 @@ sealed class Program
         await new TestHttpConnectionCommand().TestAsync(verbose, expression);
     }
 
-    private static Task ParseUrl(string[] args)
+    private static async Task ParseUrl(string[] args)
     {
         var variableName = GetArgument(args, 1);
         var expression = GetArgument(args, 2);
-        ParseUrlCommand.Parse(variableName, expression);
-        return Task.CompletedTask;
+        await ParseUrlCommand.ParseAsync(variableName, expression);
     }
 
     private async Task TestSqlConnectionAsync(bool verbose, string[] args)

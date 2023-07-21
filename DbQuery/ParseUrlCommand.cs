@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace PayrollEngine.SqlServer.DbQuery
 {
     internal sealed class ParseUrlCommand : CommandBase
     {
-        internal static void Parse(string variableName, string expression)
+        internal static async Task ParseAsync(string variableName, string expression)
         {
             if (string.IsNullOrWhiteSpace(variableName))
             {
@@ -15,7 +16,7 @@ namespace PayrollEngine.SqlServer.DbQuery
                 throw new ArgumentException(nameof(expression));
             }
 
-            expression = SharedConfiguration.Parse(expression);
+            expression = await SharedConfiguration.ParseAsync(expression);
             SetUserVariable(variableName, expression);
         }
 

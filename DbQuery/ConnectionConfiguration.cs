@@ -1,30 +1,37 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace PayrollEngine.SqlServer.DbQuery
 {
     internal static class ConnectionConfiguration
     {
-        /// <summary>Setting name, containing the Payroll database connection string</summary>
-        private static readonly string DatabaseConnectionSetting = "DatabaseConnection";
+        /// <summary>Configuration setting name, containing the payroll database connection string</summary>
+        private const string ConfigurationDatabaseConnectionString = "PayrollDatabaseConnection";
 
-        internal static string GetConnectionString(string argument = null)
+        /// <summary>Shared setting name, containing the payroll database connection string</summary>
+        private const string SharedDatabaseConnectionString = "DatabaseConnection";
+
+        internal static async Task<string> GetConnectionStringAsync(string argument = null)
         {
-            // priority 1: command line argument
             var connectionString = argument;
 
-            // priority 2: application configuration
-            if (string.IsNullOrWhiteSpace(connectionString))
+            // priority 1: command line argument
+            if (!string.IsNullOrWhiteSpace(connectionString))
             {
-                connectionString = GetConfiguration().GetConnectionString(DatabaseConnectionSetting);
+                return connectionString;
             }
 
-            // priority 3: shared configuration
-            var sharedConfiguration = SharedConfiguration.GetSharedConfiguration();
-            if (sharedConfiguration.TryGetValue(DatabaseConnectionSetting, out var value))
+            // priority 2: shared configuration, copy from Core ConfigurationExtensions
+            var sharedConfiguration = await SharedConfiguration.ReadAsync();
+            connectionString = SharedConfiguration.GetSharedValue(sharedConfiguration, SharedDatabaseConnectionString);
+            if (!string.IsNullOrWhiteSpace(connectionString))
             {
-                connectionString = value;
+                return connectionString;
             }
+
+            // priority 3: application configuration
+            connectionString = GetConfiguration().GetConnectionString(ConfigurationDatabaseConnectionString);
             return connectionString;
         }
 
