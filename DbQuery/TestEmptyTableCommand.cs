@@ -36,7 +36,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             try
             {
                 var count = await GetTableRowCountAsync(tableName, connectionString);
-                if (count == 0)
+                if (count is null or 0)
                 {
                     Environment.ExitCode = -1;
                     if (verbose)
@@ -63,7 +63,7 @@ namespace PayrollEngine.SqlServer.DbQuery
             }
         }
 
-        private static async Task<int> GetTableRowCountAsync(string tableName, string connectionString)
+        private static async Task<int?> GetTableRowCountAsync(string tableName, string connectionString)
         {
             try
             {
@@ -74,7 +74,7 @@ namespace PayrollEngine.SqlServer.DbQuery
                     await using var command = new SqlCommand(query, connection);
                     await connection.OpenAsync();
 
-                    var count = (int)command.ExecuteScalar();
+                    var count = (int?)command.ExecuteScalar();
                     return count;
                 }
             }
