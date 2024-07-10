@@ -1,14 +1,13 @@
 ﻿
-namespace PayrollEngine.SqlServer.DbQuery
+namespace PayrollEngine.SqlServer.DbQuery;
+
+public enum Command
 {
-    public enum Command
-    {
-        Query,
-        TestServer,
-        TestHttpConnection,
-        ParseUrl,
-        TestSqlConnection,
-        TestVersion,
-        TestEmptyTable
-    }
+    Query,
+    TestServer,
+    TestHttpConnection,
+    ParseUrl,
+    TestSqlConnection,
+    TestVersion,
+    TestEmptyTable
 }
