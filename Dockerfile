@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0
+FROM mcr.microsoft.com/dotnet/sdk:9.0
 WORKDIR /src
 
 # copy solution and project files
@@ -16,7 +16,7 @@ WORKDIR "/src/DbQuery"
 RUN dotnet publish "PayrollEngine.SqlServer.DbQuery.csproj" -c Release -o /app/publish --no-restore
 
 # final stage
-FROM mcr.microsoft.com/dotnet/runtime:8.0
+FROM mcr.microsoft.com/dotnet/runtime:9.0
 WORKDIR /app
 COPY --from=0 /app/publish .
 ENTRYPOINT ["dotnet", "PayrollEngine.SqlServer.DbQuery.dll"] 

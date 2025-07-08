@@ -115,8 +115,8 @@ internal sealed class TestServerCommand : CommandBase
         Console.WriteLine("      Output:");
         Console.WriteLine("          Exit code -1: database server not available");
         Console.WriteLine("          Exit code -2: invalid database connection string");
-        Console.WriteLine("      Examples:");
-        Console.WriteLine("          TestServer 'server=localhost;database=MyDatabase; Integrated Security=SSPI;TrustServerCertificate=True;' 2");
-        Wait();
+        Console.WriteLine("Examples:");
+        Console.WriteLine("    TestServer 'server=localhost;database=MyDatabase; Integrated Security=SSPI;TrustServerCertificate=True;' 2");
+        //Wait(); // disabled for docker compatibility
     }
 }

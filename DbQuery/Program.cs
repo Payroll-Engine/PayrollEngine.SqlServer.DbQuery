@@ -195,7 +195,7 @@ sealed class Program
         TestSqlConnectionCommand.ShowHelp();
         TestVersionCommand.ShowHelp();
         TestEmptyTableCommand.ShowHelp();
-        Wait();
+        // Wait();
     }
 
     private static void Wait()
