@@ -21,7 +21,7 @@ sealed class Program
         // help
         if (command == null)
         {
-            ShowHelp();
+            // ShowHelp();
             return;
         }
 
@@ -198,12 +198,14 @@ sealed class Program
         // Wait();
     }
 
+    /*
     private static void Wait()
     {
         Console.WriteLine();
         Console.Write("Press any key...");
         Console.ReadKey(true);
     }
+    */
 
     static async Task Main(string[] args) =>
         await new Program().ExecuteAsync(args);
