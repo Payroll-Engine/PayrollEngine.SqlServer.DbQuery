@@ -202,7 +202,7 @@ sealed class Program
     {
         Console.WriteLine();
         Console.Write("Press any key...");
-        Console.ReadKey(true);
+        Console.Read();
     }
 
     static async Task Main(string[] args) =>

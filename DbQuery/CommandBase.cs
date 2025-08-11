@@ -25,6 +25,6 @@ internal class CommandBase
     {
         Console.WriteLine();
         Console.Write("Press any key...");
-        Console.ReadKey(true);
+        Console.Read();
     }
 }
