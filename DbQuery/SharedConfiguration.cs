@@ -84,12 +84,15 @@ internal static class SharedConfiguration
     }
 
     // copy from Core StringExtensions
-    private static string FirstCharacterToLower(this string value) =>
-        char.ToLowerInvariant(value[0]) + value.Substring(1);
-
-    /// <summary>Ensures first string character is upper</summary>
     /// <param name="value">The string value</param>
-    /// <returns>String starting uppercase</returns>
-    private static string FirstCharacterToUpper(this string value) =>
-        value[0].ToString().ToUpper() + value.Substring(1);
+    extension(string value)
+    {
+        private string FirstCharacterToLower() =>
+            char.ToLowerInvariant(value[0]) + value.Substring(1);
+
+        /// <summary>Ensures first string character is upper</summary>
+        /// <returns>String starting uppercase</returns>
+        private string FirstCharacterToUpper() =>
+            value[0].ToString().ToUpper() + value.Substring(1);
+    }
 }
